@@ -1,2 +1,16 @@
-# rtt54-backend
-Here is backend
+# Express Backend Template
+
+
+## Dependencies
+
+- Express
+- MongoDB/Mongoose
+- Dotenv
+- Morgan
+- Cors
+- Helmet
+
+
+## Dev Dependencies
+
+- Nodemon
