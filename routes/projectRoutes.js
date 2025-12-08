@@ -5,6 +5,7 @@ const {
   getAllProjects,
   getProjectById,
   createProject,
+  updateProject,
 } = require('../controllers/projectController');
 
 const projectRouter = express.Router();
@@ -30,9 +31,7 @@ projectRouter.post('/', createProject);
 /**
  * PUT /api/projects/projectId
  */
-projectRouter.put('/:projectId', async (req, res) => {
-  res.send('update project....');
-});
+projectRouter.put('/:projectId', updateProject);
 
 /**
  * DELETE /api/projects/projectId
