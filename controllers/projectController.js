@@ -53,6 +53,8 @@ const createProject = async (req, res) => {
 const updateProject = async (req, res) => {
   try {
     const { projectId } = req.params;
+
+    // Check if project exists
     const project = await Project.findById(projectId);
 
     if (!project) {
@@ -66,6 +68,7 @@ const updateProject = async (req, res) => {
       return res.status(403).json({ message: 'User is not authorized!' });
     }
 
+    // Update project
     const updatedProject = await Project.findByIdAndUpdate(
       projectId,
       req.body,
@@ -81,9 +84,34 @@ const updateProject = async (req, res) => {
   }
 };
 
+const deleteProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res
+        .status(404)
+        .json({ message: `Project with id: ${projectId} not found!` });
+    }
+
+    // Authorization
+    if (project.user.toString() !== req.user._id) {
+      return res.status(403).json({ message: 'User is not authorized!' });
+    }
+
+    const deletedProject = await Project.findByIdAndDelete(projectId);
+    res.json(deletedProject);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllProjects,
   getProjectById,
   createProject,
   updateProject,
+  deleteProject,
 };

@@ -6,6 +6,7 @@ const {
   getProjectById,
   createProject,
   updateProject,
+  deleteProject,
 } = require('../controllers/projectController');
 
 const projectRouter = express.Router();
@@ -36,8 +37,6 @@ projectRouter.put('/:projectId', updateProject);
 /**
  * DELETE /api/projects/projectId
  */
-projectRouter.delete('/:projectId', async (req, res) => {
-  res.send('delete project....');
-});
+projectRouter.delete('/:projectId', deleteProject);
 
 module.exports = projectRouter;
