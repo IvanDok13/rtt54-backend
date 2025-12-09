@@ -1,38 +1,37 @@
 const Project = require('../models/Project');
+const Task = require('../models/Task');
 
 const getAllProjects = async (req, res) => {
   try {
     const projects = await Project.find({ user: req.user._id });
-    res.json(projects);
+    return res.status(200).json(projects);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
 
 const getProjectById = async (req, res) => {
   try {
     const { projectId } = req.params;
+
     const project = await Project.findById(projectId);
 
     if (!project) {
       return res
         .status(404)
-        .json({ message: `Project with id: ${projectId} not found!` });
+        .json({ message: `Project with id: ${projectId} not found.` });
     }
 
     // Authorization
-    console.log(req.user._id);
-    console.log(project.user);
-
-    if (project.user.toString() !== req.user._id) {
-      return res.status(403).json({ message: 'User is not authorized!' });
+    if (project.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Forbidden: Not authorized.' });
     }
 
-    res.json(project);
+    return res.status(200).json(project);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -43,10 +42,10 @@ const createProject = async (req, res) => {
       user: req.user._id,
     });
 
-    res.status(201).json(newProject);
+    return res.status(201).json(newProject);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -54,57 +53,58 @@ const updateProject = async (req, res) => {
   try {
     const { projectId } = req.params;
 
-    // Check if project exists
     const project = await Project.findById(projectId);
 
     if (!project) {
       return res
         .status(404)
-        .json({ message: `Project with id: ${projectId} not found!` });
+        .json({ message: `Project with id: ${projectId} not found.` });
     }
 
     // Authorization
-    if (project.user.toString() !== req.user._id) {
-      return res.status(403).json({ message: 'User is not authorized!' });
+    if (project.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Forbidden: Not authorized.' });
     }
 
-    // Update project
     const updatedProject = await Project.findByIdAndUpdate(
       projectId,
       req.body,
-      {
-        new: true,
-      }
+      { new: true }
     );
 
-    res.json(updatedProject);
+    return res.status(200).json(updatedProject);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
 
 const deleteProject = async (req, res) => {
   try {
     const { projectId } = req.params;
+
     const project = await Project.findById(projectId);
 
     if (!project) {
       return res
         .status(404)
-        .json({ message: `Project with id: ${projectId} not found!` });
+        .json({ message: `Project with id: ${projectId} not found.` });
     }
 
     // Authorization
-    if (project.user.toString() !== req.user._id) {
-      return res.status(403).json({ message: 'User is not authorized!' });
+    if (project.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Forbidden: Not authorized.' });
     }
 
-    const deletedProject = await Project.findByIdAndDelete(projectId);
-    res.json(deletedProject);
+    // Delete tasks
+    await Task.deleteMany({ project: projectId });
+
+    await Project.findByIdAndDelete(projectId);
+
+    return res.status(204).send();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };
 
