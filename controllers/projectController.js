@@ -98,7 +98,6 @@ const deleteProject = async (req, res) => {
 
     // Delete tasks
     await Task.deleteMany({ project: projectId });
-
     await Project.findByIdAndDelete(projectId);
 
     return res.status(204).send();
