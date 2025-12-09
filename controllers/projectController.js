@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const Task = require('../models/Task');
 
 const getAllProjects = async (req, res) => {
   try {
@@ -95,6 +96,8 @@ const deleteProject = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: Not authorized.' });
     }
 
+    // Delete tasks
+    await Task.deleteMany({ project: projectId });
     await Project.findByIdAndDelete(projectId);
 
     return res.status(204).send();
