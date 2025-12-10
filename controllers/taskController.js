@@ -61,15 +61,26 @@ const getTaskById = async (req, res) => {
 const createTask = async (req, res) => {
   try {
     const { projectId } = req.params;
+
     const project = await Project.findById(projectId);
-    if (project.user.toString() === req.user._id) {
-      const task = await Task.create({ ...req.body, project: projectId });
-      res.status(201).json(task);
-    } else {
-      res.status(400).json({ error: 'You have no access to this project' });
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
     }
+
+    if (project.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Forbidden: Not authorized' });
+    }
+
+    const task = await Task.create({
+      ...req.body,
+      project: projectId,
+    });
+
+    return res.status(201).json(task);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('CREATE TASK ERROR:', error);
+    return res.status(500).json({ error: error.message });
   }
 };
 
