@@ -26,8 +26,10 @@ function getUserById(req, res) {
  */
 async function registerUser(req, res) {
   try {
+    const { username, email, password } = req.body;
+
     // check if user exists
-    const dbUser = await User.findOne({ email: req.body.email });
+    const dbUser = await User.findOne({ email });
 
     if (dbUser) {
       return res.status(400).json({ message: 'User already exist.' });
@@ -37,9 +39,26 @@ async function registerUser(req, res) {
     const user = await User.create(req.body);
     console.log(user);
 
-    res.status(201).json(user);
+    const token = jwt.sign(
+      { data: { _id: user._id, email: user.email } },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    return res.status(201).json({
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+    });
   } catch (error) {
     console.error(error);
+    return res
+      .status(500)
+      .json({ message: 'Server error', error: error.message });
   }
 }
 
@@ -77,9 +96,12 @@ async function loginUser(req, res) {
       expiresIn: expiration,
     });
 
-    res.json({ token, user: dbUser });
+    res.status(200).json({ user: dbUser, token });
   } catch (error) {
     console.error(error);
+    return res
+      .status(500)
+      .json({ message: 'Server error', error: error.message });
   }
 }
 
